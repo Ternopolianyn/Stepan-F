@@ -1,0 +1,190 @@
+# Stepan-F
+War card game
+#####################################
+### WELCOME TO YOUR OOP PROJECT #####
+#####################################
+
+# For this project you will be using OOP to create a card game. This card game will
+# be the card game "War" for two players, you an the computer. If you don't know
+# how to play "War" here are the basic rules:
+#
+# The deck is divided evenly, with each player receiving 26 cards, dealt one at a time,
+# face down. Anyone may deal first. Each player places his stack of cards face down,
+# in front of him.
+#
+# The Play:
+#
+# Each player turns up a card at the same time and the player with the higher card
+# takes both cards and puts them, face down, on the bottom of his stack.
+#
+# If the cards are the same rank, it is War. Each player turns up three cards face
+# down and one card face up. The player with the higher cards takes both piles
+# (six cards). If the turned-up cards are again the same rank, each player places
+# another card face down and turns another card face up. The player with the
+# higher card takes all 10 cards, and so on.
+#
+# There are some more variations on this but we will keep it simple for now.
+# Ignore "double" wars
+#
+# https://en.wikipedia.org/wiki/War_(card_game)
+
+from random import shuffle
+
+# Two useful variables for creating Cards.
+SUITE = 'H D S C'.split()
+RANKS = '2 3 4 5 6 7 8 9 10 J Q K A'.split()
+
+class Deck:
+    """
+    This is the Deck Class. This object will create a deck of cards to initiate
+    play. You can then use this Deck list of cards to split in half and give to
+    the players. It will use SUITE and RANKS to create the deck. It should also
+    have a method for splitting/cutting the deck in half and Shuffling the deck.
+    """
+    def __init__(self):
+        self.deck = [(suite, rank) for rank in RANKS for suite in SUITE]
+        
+    def shuffleDeck(self):
+        shuffle(self.deck)
+
+    def split_list(self):
+        '''returns tuple of two lists'''
+        return (self.deck[:26], self.deck[26:])
+        """
+        This method will split the deck in half and give to the players.
+        """
+
+    
+
+
+
+class Hand:
+    '''
+    This is the Hand class. Each player has a Hand, and can add or remove
+    cards from that hand. There should be an add and remove card method here.
+    '''
+    def __init__(self, cards):
+        self.cards = cards
+
+    def __str__(self):
+        '''to know how many cards are in a player hand'''
+        return f"Contains {len(self.cards)} cards"
+    
+    def addCard(self, added_cards):
+        '''will be a list which we are going to extend with the added cards'''
+        self.cards.extend(added_cards)
+    
+    def removeCard(self):
+        return self.cards.pop()
+    
+
+class Player:
+    """
+    This is the Player class, which takes in a name and an instance of a Hand
+    class object. The Payer can then play cards and check if they still have cards.
+    """
+    def __init__(self, name, hand):
+        '''Initialising the player with the name and hand'''
+        self.name = name
+        self.hand = hand
+
+    def playCard(self):
+        '''Player going to get a hand object and will throw a card'''
+        drawn_card = self.hand.removeCard()
+        print(f"{self.name} played {drawn_card}")
+        print("/n")
+        return drawn_card
+
+    def remove_war_card(self):
+        '''If a player matches with a computer, a player 
+        need grab those war cards as a list'''
+        war_cards = []
+        if len(self.hand.cards) < 3: 
+            return self.hand.cards
+
+        else:
+            for x in range(3):
+                '''for this 3 war cards and append them to the list
+                form self.hand.cards'''
+                war_cards.append(self.hand.cards.pop())
+                '''self.hand.cards.pop() is the same as function removeCard()'''
+            return war_cards
+
+    def checkHand(self):
+        '''Check if the player still has cards'''
+        return len(self.hand.cards) != 0
+
+   
+
+
+######################
+#### GAME PLAY #######
+######################
+print("Welcome to War, let's begin...")
+
+# 1) Cretae a new deck of cards and spliy it in half:
+d = Deck()
+d.shuffleDeck()
+deck_half1, deck_half2 = d.split_list()
+
+# 2) Cretae both players:
+computer = Player("Computer", Hand(deck_half1))
+
+name = input("What is your name? ")
+player1 = Player(name, Hand(deck_half2))
+
+# 3) Start the game:
+total_rounds = 0
+war_count = 0
+
+'''Cheking if both players have cards'''
+while player1.checkHand() and computer.checkHand():
+    total_rounds += 1
+    print('Lets play a new round!')
+    print('Cheking standings')
+    print(player1.name, 'has', player1.hand.cards, 'cards')
+    print(computer.name, 'has', computer.hand.cards, 'cards')
+    print('\n Play a card:')
+
+    # 4) Play a card:
+    table_card = []
+
+    computer_card = computer.playCard()
+    player1_card = player1.playCard()
+
+    table_card.append(computer_card)
+    table_card.append(player1_card)
+
+    # 5) Check if there is a war card:
+    if computer_card[1] == player1_card[1]:
+        war_count += 1 #if happens war + 1 to war count
+        print('WAR!!!')
+        '''We extend 3 cards each'''
+        table_card.extend(player1.remove_war_card())
+        table_card.extend(computer.remove_war_card())
+        #Ranks is very top list where we can compare rank postion of cards
+        #We ask by INDEX() where is a card in a list by particular rank
+        if RANKS.index(player1_card[1]) > RANKS.index(computer_card[1]):
+            player1.hand.addCard(table_card)
+        else:
+            computer.hand.addCard(table_card)
+
+    #We check who has bigger card and add it to a winner hand
+    else:
+        if RANKS.index(player1_card[1]) > RANKS.index(computer_card[1]):
+            player1.hand.addCard(table_card)
+        else:
+            computer.hand.addCard(table_card)
+
+#6) Check how many rounds have been played:
+print(f"GAME OVER. Total rounds played: {total_rounds}")
+print(f"WAR COUNT: {war_count} times.")
+print(f'Computer has {len(computer.hand.cards)} cards')
+print(f'Player 1 has {len(player1.hand.cards)} cards')
+
+
+
+
+            
+
+# Use the 3 classes along with some logic to play a game of war!
